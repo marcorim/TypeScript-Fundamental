@@ -1,4 +1,4 @@
- import { accesOptions, userType } from './models';
+ import { accesOptions, IUser } from './models';
 
 let content = document.getElementById('content') as HTMLElement;
 const button = <HTMLInputElement>document.querySelector('button[id="add"');
@@ -8,35 +8,36 @@ button.addEventListener('click', addEmployee);
 const accessOptionsValues = Object.values(accesOptions);
 
 const updateUserLayout = async (): Promise<void> => {
-  const users: userType[] = await getUser();
-  users.map((user: userType) => {
+  const users: IUser[] = await getUser();
+  users.map((user: IUser) => {
     content.innerHTML += createLine(user);
   });
 }
 
-const getUser = async (): Promise<userType[]> => {
+const getUser = async (): Promise<IUser[]> => {
   const response: Response = await fetch('http://localhost:5011/users');
-  const users: userType[] = await response.json();
+  const users: IUser[] = await response.json();
   return users;
 }
 
 updateUserLayout();
-
-
 
 function addEmployee(): void {
   let fullName = document.querySelector('#fullName') as HTMLInputElement;
   let register  = document.querySelector('#register') as HTMLInputElement;
   let admin  = document.querySelector('input[name="access"]:checked') as HTMLInputElement;
   let active  = document.querySelector('#active') as HTMLInputElement;
-  let user: userType;
+  let addressHome = document.querySelector('#addressHome') as HTMLInputElement;
+  let addressWork = document.querySelector('#addressWork') as HTMLInputElement;
 
-    content.innerHTML += createLineByUserField(fullName.value,
-      register.value,
-      active.checked,
-      admin.value as accesOptions,
-      'Rua teste, 123','Bairro teste, Cidade teste, Estado teste, CEP teste'
-    );
+  let user: IUser = {
+    fullName: fullName!.value,
+    register: register.value != '' ? register.value : undefined,
+    access: <accesOptions>admin.value,
+    active: active.checked,
+    address: [addressHome.value, addressWork.value]
+  }
+  content.innerHTML += createLine(user);
 }
 
 accessOptionsValues.forEach((value: string, i: number) => {
@@ -74,7 +75,7 @@ function createLineByUserField(
   `;
 }
 
-function createLine(user: userType) {
+function createLine(user: IUser) {
   return `
   <div class="card">
       <div class="card-header">
